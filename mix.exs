@@ -28,6 +28,7 @@ defmodule GraphqlSmartCell.MixProject do
   defp deps do
     [
       {:absinthe_client, "~> 0.1.0"},
+      {:kino, "~> 0.6.1 or ~> 0.7.0"},
       {:ex_doc, "~> 0.28", only: :dev, runtime: false}
     ]
   end

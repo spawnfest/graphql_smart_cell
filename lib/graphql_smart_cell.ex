@@ -3,16 +3,14 @@ defmodule GraphqlSmartCell do
   Documentation for `GraphqlSmartCell`.
   """
 
-  @doc """
-  Hello world.
+  def build_connection(url) do
+    # FAKE THE FUNK.
+    me = self()
 
-  ## Examples
-
-      iex> GraphqlSmartCell.hello()
-      :world
-
-  """
-  def hello do
-    :world
+    spawn(fn ->
+      receive do
+        x -> send(me, {:connection, url, x})
+      end
+    end)
   end
 end

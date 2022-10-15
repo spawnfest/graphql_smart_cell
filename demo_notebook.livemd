@@ -1,0 +1,27 @@
+# Demo Notebook
+
+```elixir
+Mix.install([
+  {:graphql_smart_cell, path: "/Users/jason/Workspace/elixirs/graphql_smart_cell"}
+])
+```
+
+## Section
+
+```elixir
+conn = GraphqlSmartCell.build_connection("http://localhost:4000/api")
+```
+
+```elixir
+conn |> send("hi")
+```
+
+```elixir
+x =
+  receive do
+    x -> x
+  after
+    300 ->
+      :timeout
+  end
+```

@@ -11,7 +11,12 @@ defmodule GraphqlSmartCell.Introspection do
   @query File.read!(@query_file)
 
   def get(%Request{} = client, opts \\ []) do
-    opts = Keyword.put(opts, :graphql, {@query, %{}})
+    opts =
+      opts
+      |> Keyword.put(:graphql, {@query, %{}})
+      # TODO: fix this. "JUST DOOO IT -Crumm
+      |> Keyword.put(:params, %{operationName: "IntrospectionQuery"})
+
     Req.post!(client, opts).body
   end
 end

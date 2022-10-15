@@ -9,19 +9,5 @@ Mix.install([
 ## Section
 
 ```elixir
-conn = GraphqlSmartCell.build_connection("http://localhost:4000/api")
-```
-
-```elixir
-conn |> send("hi")
-```
-
-```elixir
-x =
-  receive do
-    x -> x
-  after
-    300 ->
-      :timeout
-  end
+client = AbsintheClient.attach(Req.new(base_url: "http://localhost:4000/api"))
 ```

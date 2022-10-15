@@ -1,8 +1,6 @@
 defmodule GraphqlSmartCell.ClientCell do
   @moduledoc false
 
-  # A smart cell used to establish connection to a GraphQL server.
-
   use Kino.JS, assets_path: "lib/assets/client_cell"
   use Kino.JS.Live
   use Kino.SmartCell, name: "GraphQL connection"
@@ -12,7 +10,7 @@ defmodule GraphqlSmartCell.ClientCell do
   @impl Kino.JS.Live
   def init(attrs, %Context{} = ctx) do
     fields = %{
-      "variable" => Kino.SmartCell.prefixed_var_name("conn", attrs["variable"]),
+      "variable" => Kino.SmartCell.prefixed_var_name("client", attrs["variable"]),
       "url" => attrs["url"] || "http://localhost:4000/api"
     }
 
@@ -39,23 +37,28 @@ defmodule GraphqlSmartCell.ClientCell do
   end
 
   @impl Kino.SmartCell
-  def to_source(%{fields: fields} = attrs) do
+  def to_source(%{fields: fields} = assigns_from_to_attrs) do
     # is attrs the result of "to_attrs/1" ??
 
     variable = fields["variable"]
     url = fields["url"]
 
     if not is_variable_valid?(variable) do
-      raise "GraphqlSmartCell.ClientCell expects a valid variable name, but got: #{inspect(variable)} - attrs: #{inspect(attrs)}"
+      raise "GraphqlSmartCell.ClientCell expects a valid variable name, but got: #{inspect(variable)} - attrs: #{inspect(assigns_from_to_attrs)}"
     end
 
     if not is_url_valid?(url) do
-      raise "GraphqlSmartCell.ClientCell expects a valid url, but got: #{inspect(url)} - attrs: #{inspect(attrs)}"
+      raise "GraphqlSmartCell.ClientCell expects a valid url, but got: #{inspect(url)} - attrs: #{inspect(assigns_from_to_attrs)}"
     end
 
+    # valid elixir source code
     """
-    #{variable} = GraphqlSmartCell.build_connection(#{inspect(url)})
+    #{variable} = #{inspect(__MODULE__)}.do_the_work(#{inspect(url)})
     """
+  end
+
+  def do_the_work(url) do
+    AbsintheClient.attach(Req.new(base_url: url))
   end
 
   @impl Kino.JS.Live
@@ -84,9 +87,9 @@ defmodule GraphqlSmartCell.ClientCell do
   defp to_updates(fields, "url", value) do
     # only update url if it is a "complete" url
     if is_url_valid?(value) do
-      %{"url" => fields["url"]}
-    else
       %{"url" => value}
+    else
+      %{"url" => fields["url"]}
     end
   end
 

@@ -1,0 +1,14 @@
+# Components
+
+
+```elixir
+Mix.install([
+  {:graphql_smart_cell, "~> 0.1.0", github: "spawnfest/graphql_smart_cell"}
+])
+```
+
+## Smart cells
+
+The following Smart cells are available:
+
+TODO

@@ -105,5 +105,5 @@ defmodule GraphqlSmartCell.ClientCell do
     !(uri.scheme == nil || uri.host == nil)
   end
 
-  # defp is_url_valid?(_), do: false
+  defp is_url_valid?(_), do: false
 end

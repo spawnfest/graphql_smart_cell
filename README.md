@@ -44,7 +44,7 @@ See the guide in the docs.
 
 <img src="https://user-images.githubusercontent.com/168677/196064395-a663987c-a34e-4177-8bbc-b67512faae02.png">
 
-## The "dream"
+### The "dream"
 
 <img src="https://user-images.githubusercontent.com/10274508/196064112-558e4d5f-1f7e-452e-81b6-89d1e3f30419.png">
 

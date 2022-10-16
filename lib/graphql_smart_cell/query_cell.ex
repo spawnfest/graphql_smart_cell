@@ -16,10 +16,12 @@ defmodule GraphqlSmartCell.QueryCell do
           end,
         result_variable: Kino.SmartCell.prefixed_var_name("result", attrs["result_variable"]),
         timeout: attrs["timeout"],
-        cache_query: attrs["cache_query"] || true
+        cache_query: attrs["cache_query"] || true,
+        query: ""
       )
 
-    {:ok, ctx, editor: [attribute: "query", language: "graphql"]}
+    # {:ok, ctx, editor: [attribute: "query", language: "graphql"]}
+    {:ok, ctx}
   end
 
   @impl true
@@ -40,6 +42,13 @@ defmodule GraphqlSmartCell.QueryCell do
     client = Enum.find(ctx.assigns.clients, &(&1.variable == variable))
     ctx = assign(ctx, client: client)
     broadcast_event(ctx, "update_client", client.variable)
+    {:noreply, ctx}
+  end
+
+  def handle_event("update_query", query, ctx) do
+    broadcast_event(ctx, "update_query", query)
+    ctx = assign(ctx, query: query)
+
     {:noreply, ctx}
   end
 

@@ -265,6 +265,14 @@ select.input {
   transform: translateX(100%);
 }
 
-.switch-button-checkbox:checked + .switch-button-bg {
+.switch-button-checkbox:checked+.switch-button-bg {
   background-color: var(--blue-600);
+}
+
+.graphiql-query-editor,
+.graphiql-query-editor-wrapper {
+  height: auto;
+  min-height: 20rem;
+  max-height: 50rem;
+  overflow-y: auto;
 }

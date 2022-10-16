@@ -5,15 +5,13 @@ defmodule GraphqlSmartCell.QueryCell do
   use Kino.JS.Live
   use Kino.SmartCell, name: "GraphQL query"
 
-  @default_query ""
-
   @impl true
   def init(attrs, ctx) do
     ctx =
       assign(ctx,
-        connections: [],
-        connection:
-          if conn_attrs = attrs["connection"] do
+        clients: [],
+        client:
+          if conn_attrs = attrs["client"] do
             %{variable: conn_attrs["variable"], type: conn_attrs["type"]}
           end,
         result_variable: Kino.SmartCell.prefixed_var_name("result", attrs["result_variable"]),
@@ -21,14 +19,14 @@ defmodule GraphqlSmartCell.QueryCell do
         cache_query: attrs["cache_query"] || true
       )
 
-    {:ok, ctx, editor: [attribute: "query", language: "graphql", default_source: @default_query]}
+    {:ok, ctx}
   end
 
   @impl true
   def handle_connect(ctx) do
     payload = %{
-      connections: ctx.assigns.connections,
-      connection: ctx.assigns.connection,
+      clients: ctx.assigns.clients,
+      client: ctx.assigns.client,
       result_variable: ctx.assigns.result_variable,
       timeout: ctx.assigns.timeout,
       cache_query: ctx.assigns.cache_query
@@ -38,10 +36,10 @@ defmodule GraphqlSmartCell.QueryCell do
   end
 
   @impl true
-  def handle_event("update_connection", variable, ctx) do
-    connection = Enum.find(ctx.assigns.connections, &(&1.variable == variable))
-    ctx = assign(ctx, connection: connection)
-    broadcast_event(ctx, "update_connection", connection.variable)
+  def handle_event("update_client", variable, ctx) do
+    client = Enum.find(ctx.assigns.clients, &(&1.variable == variable))
+    ctx = assign(ctx, client: client)
+    broadcast_event(ctx, "update_client", client.variable)
     {:noreply, ctx}
   end
 
@@ -78,53 +76,53 @@ defmodule GraphqlSmartCell.QueryCell do
 
   @impl true
   def scan_binding(pid, binding, _env) do
-    connections =
+    clients =
       for {key, value} <- binding,
           is_atom(key),
           type = client_type(value),
           do: %{variable: Atom.to_string(key), type: type}
 
-    send(pid, {:connections, connections})
+    send(pid, {:clients, clients})
   end
 
   @impl true
-  def handle_info({:connections, connections}, ctx) do
-    connection = search_connection(connections, ctx.assigns.connection)
+  def handle_info({:clients, clients}, ctx) do
+    client = search_client(clients, ctx.assigns.client)
 
-    broadcast_event(ctx, "connections", %{
-      "connections" => connections,
-      "connection" => connection
+    broadcast_event(ctx, "clients", %{
+      "clients" => clients,
+      "client" => client
     })
 
-    {:noreply, assign(ctx, connections: connections, connection: connection)}
+    {:noreply, assign(ctx, clients: clients, client: client)}
   end
 
-  defp search_connection([connection | _], nil), do: connection
+  defp search_client([client | _], nil), do: client
 
-  defp search_connection([], connection), do: connection
+  defp search_client([], client), do: client
 
-  defp search_connection(connections, %{variable: variable}) do
-    case Enum.find(connections, &(&1.variable == variable)) do
-      nil -> List.first(connections)
-      connection -> connection
+  defp search_client(clients, %{variable: variable}) do
+    case Enum.find(clients, &(&1.variable == variable)) do
+      nil -> List.first(clients)
+      client -> client
     end
   end
 
-  defp client_type(connection) when is_struct(connection, Req.Request) do
+  defp client_type(client) when is_struct(client, Req.Request) do
     cond do
-      Keyword.has_key?(connection.request_steps, :graphql_run) -> "graphql"
+      Keyword.has_key?(client.request_steps, :graphql_run) -> "graphql"
       true -> nil
     end
   end
 
-  defp client_type(_connection), do: nil
+  defp client_type(_client), do: nil
 
   @impl true
   def to_attrs(ctx) do
     %{
-      "connection" =>
-        if connection = ctx.assigns.connection do
-          %{"variable" => connection.variable, "type" => connection.type}
+      "client" =>
+        if client = ctx.assigns.client do
+          %{"variable" => client.variable, "type" => client.type}
         end,
       "result_variable" => ctx.assigns.result_variable,
       "timeout" => ctx.assigns.timeout,
@@ -137,7 +135,7 @@ defmodule GraphqlSmartCell.QueryCell do
     attrs |> to_quoted() |> Kino.SmartCell.quoted_to_string()
   end
 
-  defp to_quoted(%{"connection" => %{"type" => "graphql"}} = attrs) do
+  defp to_quoted(%{"client" => %{"type" => "graphql"}} = attrs) do
     to_req_quoted(attrs, fn _n -> "?" end, :graphql)
   end
 
@@ -155,7 +153,7 @@ defmodule GraphqlSmartCell.QueryCell do
     quote do
       unquote(quoted_var(attrs["result_variable"])) =
         Req.post!(
-          unquote(quoted_var(attrs["connection"]["variable"])),
+          unquote(quoted_var(attrs["client"]["variable"])),
           unquote(req_opts)
         ).body
     end

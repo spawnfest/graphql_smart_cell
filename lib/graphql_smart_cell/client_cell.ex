@@ -3,7 +3,7 @@ defmodule GraphqlSmartCell.ClientCell do
 
   use Kino.JS, assets_path: "lib/assets/client_cell"
   use Kino.JS.Live
-  use Kino.SmartCell, name: "GraphQL connection"
+  use Kino.SmartCell, name: "GraphQL client"
 
   alias Kino.JS.Live.Context
 

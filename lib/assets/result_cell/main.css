@@ -265,6 +265,6 @@ select.input {
   transform: translateX(100%);
 }
 
-.switch-button-checkbox:checked + .switch-button-bg {
+.switch-button-checkbox:checked+.switch-button-bg {
   background-color: var(--blue-600);
 }

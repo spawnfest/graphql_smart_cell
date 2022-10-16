@@ -50,3 +50,8 @@ Ultimately we came very close to shipping the following integration with GraphiQ
 Consider this a cautionary tale in relying on JavaScript!
 
 <img src="https://user-images.githubusercontent.com/10274508/196064112-558e4d5f-1f7e-452e-81b6-89d1e3f30419.png">
+
+## Acknowledgements
+
+This project was based on and uses some code from
+the [KinoDB](https://github.com/livebook-dev/kino_db) project, Apache-2.0 License.

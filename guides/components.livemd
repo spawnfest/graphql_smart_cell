@@ -10,4 +10,5 @@ Mix.install([
 
 The following Smart cells are available:
 
-TODO
+* **GraphQL client** - for establishing a connection to a GraphQL server
+* **GraphQL query** - for performing GraphQL operations

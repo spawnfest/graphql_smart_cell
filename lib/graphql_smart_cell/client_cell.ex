@@ -11,7 +11,7 @@ defmodule GraphqlSmartCell.ClientCell do
   def init(attrs, %Context{} = ctx) do
     fields = %{
       "variable" => Kino.SmartCell.prefixed_var_name("client", attrs["variable"]),
-      "url" => attrs["url"] || "http://localhost:4000/api"
+      "url" => attrs["url"] || "https://rickandmortyapi.com"
     }
 
     ctx = Context.assign(ctx, fields: fields)

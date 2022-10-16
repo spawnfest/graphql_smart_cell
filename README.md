@@ -32,7 +32,7 @@ be found at <https://hexdocs.pm/graphql_smart_cell>.
 
 ## Usage
 
-See the guide in the docs.
+Run `mix docs && open docs/index.html`, then use the **Run in Livebook** button.
 
 ## Screenshots
 

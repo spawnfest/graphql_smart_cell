@@ -269,14 +269,8 @@ select.input {
   background-color: var(--blue-600);
 }
 
-.graphiql-main,
-.graphiql-sessions,
-.graphiql-session,
-.graphiql-editor,
 .graphiql-query-editor,
-.graphiql-query-editor-wrapper,
-.flex-row-110,
-.flex-row-310 {
+.graphiql-query-editor-wrapper {
   height: auto;
   min-height: 20rem;
   max-height: 50rem;

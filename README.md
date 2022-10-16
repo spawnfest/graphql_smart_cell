@@ -44,9 +44,9 @@ Run `mix docs && open docs/index.html`, then use the **Run in Livebook** button.
 
 <img src="https://user-images.githubusercontent.com/168677/196064395-a663987c-a34e-4177-8bbc-b67512faae02.png">
 
-### The "dream"
+### Our vision
+
+Ultimately we came very close to shipping the following integration with GraphiQL–
+Consider this a cautionary tale in relying on JavaScript!
 
 <img src="https://user-images.githubusercontent.com/10274508/196064112-558e4d5f-1f7e-452e-81b6-89d1e3f30419.png">
-
-At one point, we had GraphiQL powering our cells.
-Consider this a cautionary tale in relying on JavaScript!

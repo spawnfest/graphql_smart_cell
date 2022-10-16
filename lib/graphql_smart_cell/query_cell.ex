@@ -19,7 +19,7 @@ defmodule GraphqlSmartCell.QueryCell do
         cache_query: attrs["cache_query"] || true
       )
 
-    {:ok, ctx}
+    {:ok, ctx, editor: [attribute: "query", language: "graphql"]}
   end
 
   @impl true
@@ -151,11 +151,13 @@ defmodule GraphqlSmartCell.QueryCell do
     req_opts = opts |> Enum.at(0, []) |> Keyword.put(req_key, query)
 
     quote do
-      unquote(quoted_var(attrs["result_variable"])) =
-        Req.post!(
-          unquote(quoted_var(attrs["client"]["variable"])),
-          unquote(req_opts)
-        ).body
+      unquote(quoted_var(attrs["result_variable"])) = %AbsintheClientResult{
+        req_response:
+          Req.post!(
+            unquote(quoted_var(attrs["client"]["variable"])),
+            unquote(req_opts)
+          )
+      }
     end
   end
 

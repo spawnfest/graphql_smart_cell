@@ -9,7 +9,6 @@ defmodule GraphqlSmartCell.Application do
   def start(_type, _args) do
     Kino.SmartCell.register(GraphqlSmartCell.ClientCell)
     Kino.SmartCell.register(GraphqlSmartCell.QueryCell)
-    Kino.SmartCell.register(GraphqlSmartCell.GraphiQLCell)
     Kino.SmartCell.register(GraphqlSmartCell.EditorCell)
 
     children = []

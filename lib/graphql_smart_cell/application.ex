@@ -10,6 +10,7 @@ defmodule GraphqlSmartCell.Application do
     Kino.SmartCell.register(GraphqlSmartCell.ClientCell)
     Kino.SmartCell.register(GraphqlSmartCell.QueryCell)
     Kino.SmartCell.register(GraphqlSmartCell.ResultCell)
+    Kino.SmartCell.register(GraphqlSmartCell.GraphiQLCell)
 
     children = []
     opts = [strategy: :one_for_one, name: GraphqlSmartCell.Supervisor]

@@ -6,6 +6,8 @@ defmodule GraphqlSmartCell.ResultCell do
   use Kino.JS.Live
   use Kino.SmartCell, name: "GraphQL result"
 
+  alias Kino.JS.Live.Context
+
   @impl Kino.JS.Live
   def init(attrs, ctx) do
     ctx =
@@ -15,10 +17,11 @@ defmodule GraphqlSmartCell.ResultCell do
           if conn_attrs = attrs["connection"] do
             %{variable: conn_attrs["variable"], type: conn_attrs["type"]}
           end,
-        result_variable: Kino.SmartCell.prefixed_var_name("result", attrs["result_variable"])
+        result_variable: Kino.SmartCell.prefixed_var_name("data", attrs["result_variable"]),
+        variable: Kino.SmartCell.prefixed_var_name("req_response", attrs["variable"])
       )
 
-    {:ok, ctx, editor: [attribute: "json", language: "json"]}
+    {:ok, ctx}
   end
 
   @impl Kino.JS.Live
@@ -26,7 +29,8 @@ defmodule GraphqlSmartCell.ResultCell do
     payload = %{
       connections: ctx.assigns.connections,
       connection: ctx.assigns.connection,
-      result_variable: ctx.assigns.result_variable
+      result_variable: ctx.assigns.result_variable,
+      variable: ctx.assigns.variable
     }
 
     {:ok, payload, ctx}
@@ -37,6 +41,13 @@ defmodule GraphqlSmartCell.ResultCell do
     connection = Enum.find(ctx.assigns.connections, &(&1.variable == variable))
     ctx = assign(ctx, connection: connection)
     broadcast_event(ctx, "update_connection", connection.variable)
+    {:noreply, ctx}
+  end
+
+  # Is this right? Or even needed?
+  def handle_event("update_connections", connections, ctx) do
+    ctx = assign(ctx, connections: connections)
+    broadcast_event(ctx, "update_connections", connections)
     {:noreply, ctx}
   end
 
@@ -53,12 +64,25 @@ defmodule GraphqlSmartCell.ResultCell do
     {:noreply, ctx}
   end
 
+  def handle_event("update_field", %{"field" => field, "value" => value}, ctx) do
+    # event comes into this function from the frontend.
+    updated_fields = to_updates(ctx.assigns.fields, field, value)
+
+    # run the code to update the pertinent fields.
+    ctx = Context.update(ctx, :fields, &Map.merge(&1, updated_fields))
+
+    # push the changes to the fields back to the frontend.
+    _ = Context.broadcast_event(ctx, "update", %{"fields" => updated_fields})
+
+    {:noreply, ctx}
+  end
+
   @impl Kino.SmartCell
   def scan_binding(pid, binding, _env) do
     connections =
       for {key, value} <- binding,
           is_atom(key),
-          type = graphql_result_type(value),
+          type = req_response_type(value),
           do: %{variable: Atom.to_string(key), type: type}
 
     send(pid, {:connections, connections})
@@ -87,9 +111,9 @@ defmodule GraphqlSmartCell.ResultCell do
     end
   end
 
-  defp graphql_result_type(value) do
-    if Map.has_key?(value, "data") or Map.has_key?(value, "errors") do
-      "graphql_result"
+  defp req_response_type(value) do
+    if is_struct(value, Req.Response) do
+      "req_response"
     else
       nil
     end
@@ -108,33 +132,32 @@ defmodule GraphqlSmartCell.ResultCell do
 
   @impl Kino.SmartCell
   def to_source(attrs) do
-    "#{inspect(attrs)}"
+    attrs |> to_quoted() |> Kino.SmartCell.quoted_to_string()
   end
 
-  # defp to_quoted(%{"connection" => %{"type" => "graphql_result"}} = attrs) do
-  #   to_req_quoted(attrs, fn _n -> "?" end, :graphql_result)
-  # end
+  # "data = %AbsintheClientResult{req_response: req_response}"
+  defp to_quoted(attrs) do
+    quote do
+      unquote(quoted_var(attrs["result_variable"])) = %AbsintheClientResult{
+        req_response: unquote(quoted_var(attrs["connection"]["variable"]))
+      }
+    end
+  end
 
-  # defp to_quoted(_ctx) do
-  #   quote do
-  #   end
-  # end
+  defp quoted_var(nil), do: nil
+  defp quoted_var(string), do: {String.to_atom(string), [], nil}
 
-  # defp to_req_quoted(attrs, _next, req_key) do
-  #   #                         👇 these are the GraphQL attributes
-  #   query = {attrs["query"], %{}}
-  #   opts = []
-  #   req_opts = opts |> Enum.at(0, []) |> Keyword.put(req_key, query)
+  defp to_updates(fields, "variable", value) do
+    # update variable name only if it is valid.
+    if is_variable_valid?(value) do
+      %{"variable" => value}
+    else
+      %{"variable" => fields["variable"]}
+    end
+  end
 
-  #   quote do
-  #     unquote(quoted_var(attrs["result_variable"])) =
-  #       Req.post!(
-  #         unquote(quoted_var(attrs["connection"]["variable"])),
-  #         unquote(req_opts)
-  #       ).body
-  #   end
-  # end
-
-  # defp quoted_var(nil), do: nil
-  # defp quoted_var(string), do: {String.to_atom(string), [], nil}
+  defp is_variable_valid?(value) do
+    # calls into the deep magic :elixir_config
+    is_binary(value) && Kino.SmartCell.valid_variable_name?(value)
+  end
 end
